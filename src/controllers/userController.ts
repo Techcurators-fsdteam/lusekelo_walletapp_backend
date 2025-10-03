@@ -95,3 +95,36 @@ export const verifyPin = async (req: Request, res: Response) => {
     res.status(500).json({ msg: 'Server error' });
   }
 };
+// Update Avatar
+export const updateAvatar = async (req: Request, res: Response) => {
+  try {
+    console.log("Avatar upload request received");
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+    console.log("Request files:", (req as any).files);
+    
+    if (!req.file) {
+      console.log("No file found in request");
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    console.log("File details:", {
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    });
+
+    const user = await User.findByIdAndUpdate(
+      (req as any).user.id,
+      { avatar: `/uploads/avatars/${req.file.filename}` }, // save path
+      { new: true }
+    ).select("-password");
+
+    console.log("Avatar updated successfully for user:", (req as any).user.id);
+    res.json(user);
+  } catch (err) {
+    console.error("Avatar upload error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};

@@ -1,7 +1,8 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 interface IUser extends mongoose.Document {
+  _id: Types.ObjectId;
   fullName?: string;
   password?: string;
   mobile: string;  // Required for OTP authentication
@@ -11,10 +12,11 @@ interface IUser extends mongoose.Document {
   balance: number;  // Wallet balance in TZS
   language: 'English' | 'Swahili';  // From PDF page 4
   isVerified: boolean;  // Phone number verification status
-  otp?: string;  // Current OTP
-  otpExpiry?: Date;  // OTP expiration time
-  pin?: string;  // 4-digit UPI PIN for transactions
-  phoneNumber?: string;  // Alternative field name for mobile
+  otp?: string;  
+  otpExpiry?: Date; 
+  pin?: string;  
+  phoneNumber?: string;  
+  avatar?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -31,6 +33,7 @@ const userSchema = new mongoose.Schema<IUser>({
   otpExpiry: { type: Date },
   pin: { type: String, minlength: 4, maxlength: 4 },  // 4-digit UPI PIN
   phoneNumber: { type: String },  // Alternative field for mobile
+  avatar: { type: String },  // Avatar image path
 }, {
   timestamps: true
 });

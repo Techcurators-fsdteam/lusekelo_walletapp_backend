@@ -10,6 +10,7 @@ import serviceRoutes from './routes/service';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 import qrRoutes from './routes/qr';
+import path from 'path';
 
 
 dotenv.config();
@@ -35,6 +36,8 @@ app.use('/api/transaction', transactionRoutes);
 app.use('/api/pay', payRoutes);
 app.use('/api/service', serviceRoutes);
 app.use('/api/qr', qrRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

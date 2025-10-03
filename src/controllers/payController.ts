@@ -44,11 +44,11 @@ const parseUPIQRData = (qrData: string) => {
       const url = new URL(qrData);
       const params = url.searchParams;
       return {
-        upiId: params.get('pa') || '',
-        name: params.get('pn') || '',
-        amount: params.get('am') ? parseFloat(params.get('am')) : null,
-        currency: params.get('cu') || 'INR',
-        description: params.get('tn') || '',
+        upiId: params.get('pa') ?? '',
+        name: params.get('pn') ?? '',
+        amount: params.get('am') ? parseFloat(params.get('am')!) : null,
+        currency: params.get('cu') ?? 'INR',
+        description: params.get('tn') ?? '',
       };
     }
     
@@ -93,7 +93,7 @@ export const processQRPayment = async (req: Request, res: Response) => {
     }
 
     // Parse QR data
-    const parsedQR = parseUPIQRData(qrData);
+    const parsedQR = parseUPIQRData(qrData as string);
     
     // Find recipient by UPI ID, phone number, or full name
     let recipient = null;
