@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "."
   },
-  "include": ["src", "declarations.d.ts", "src/api/index.ts"]
+  "include": ["src", "declarations.d.ts", "api/index.ts"]
 }
