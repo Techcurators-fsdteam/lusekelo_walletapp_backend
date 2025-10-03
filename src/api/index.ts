@@ -1,15 +1,15 @@
 // import express from 'express';
 // import dotenv from 'dotenv';
 // import cors from 'cors';
-// import connectDB from './config/db';
-// import authRoutes from './routes/auth';
-// import userRoutes from './routes/user';
-// import transactionRoutes from './routes/transaction';
-// import payRoutes from './routes/pay';
-// import serviceRoutes from './routes/service';
+// import connectDB from '../config/db';
+// import authRoutes from '../routes/auth';
+// import userRoutes from '../routes/user';
+// import transactionRoutes from '../routes/transaction';
+// import payRoutes from '../routes/pay';
+// import serviceRoutes from '../routes/service';
 // import rateLimit from 'express-rate-limit';
 // import { Request, Response, NextFunction } from 'express';
-// import qrRoutes from './routes/qr';
+// import qrRoutes from '../routes/qr';
 // import path from 'path';
 
 
@@ -60,15 +60,15 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import connectDB from './config/db';
-import authRoutes from './routes/auth';
-import userRoutes from './routes/user';
-import transactionRoutes from './routes/transaction';
-import payRoutes from './routes/pay';
-import serviceRoutes from './routes/service';
+import connectDB from '../config/db';
+import authRoutes from '../routes/auth';
+import userRoutes from '../routes/user';
+import transactionRoutes from '../routes/transaction';
+import payRoutes from '../routes/pay';
+import serviceRoutes from '../routes/service';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
-import qrRoutes from './routes/qr';
+import qrRoutes from '../routes/qr';
 import path from 'path';
 
 dotenv.config();

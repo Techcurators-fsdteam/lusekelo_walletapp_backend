@@ -10,5 +10,5 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src", "declarations.d.ts"]
+  "include": ["src", "declarations.d.ts", "src/api/index.ts"]
 }
