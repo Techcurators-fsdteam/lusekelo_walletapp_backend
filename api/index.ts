@@ -71,7 +71,10 @@ import { Request, Response, NextFunction } from 'express';
 import qrRoutes from '../src/routes/qr';
 import path from 'path';
 
+// Configure dotenv
 dotenv.config();
+
+// Connect to database
 connectDB();
 
 const limiter = rateLimit({

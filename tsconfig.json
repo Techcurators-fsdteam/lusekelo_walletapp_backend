@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2020",
     "module": "commonjs",
+    "lib": ["ES2020"],
     "strict": true,
     "esModuleInterop": true,      
     "allowSyntheticDefaultImports": true, 
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "outDir": "./dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "declaration": false,
+    "removeComments": true,
+    "noEmitOnError": false
   },
-  "include": ["src", "declarations.d.ts", "api/index.ts"]
+  "include": ["src/**/*", "declarations.d.ts", "api/index.ts"],
+  "exclude": ["node_modules", "dist"]
 }
