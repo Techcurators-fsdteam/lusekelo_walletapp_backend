@@ -12,4 +12,3 @@ exports.validateSignup = [
         next();
     },
 ];
-// Add similar for other routes, e.g., validateLogin

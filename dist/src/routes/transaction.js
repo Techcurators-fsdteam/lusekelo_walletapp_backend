@@ -10,5 +10,4 @@ const router = express_1.default.Router();
 router.get('/history', authMiddleware_1.protect, transactionController_1.getHistory);
 router.post('/send', authMiddleware_1.protect, transactionController_1.sendMoney);
 router.post('/receive', authMiddleware_1.protect, transactionController_1.receiveMoney);
-// Add more: router.post('/recharge', protect, mobileRecharge); etc.
 exports.default = router;

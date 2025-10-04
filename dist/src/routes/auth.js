@@ -7,7 +7,6 @@ const express_1 = __importDefault(require("express"));
 const authController_1 = require("../controllers/authController");
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-// OTP-based authentication routes
 router.post('/send-otp', authController_1.sendOTP);
 router.post('/verify-otp', authController_1.verifyOTP);
 router.post('/resend-otp', authController_1.resendOTP);

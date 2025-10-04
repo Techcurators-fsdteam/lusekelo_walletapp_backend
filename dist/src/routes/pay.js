@@ -8,5 +8,5 @@ const payController_1 = require("../controllers/payController");
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.post('/generate', authMiddleware_1.protect, payController_1.generateQR);
-router.post('/scan', authMiddleware_1.protect, payController_1.processQRPayment); // Use /api/pay/scan
+router.post('/scan', authMiddleware_1.protect, payController_1.processQRPayment);
 exports.default = router;

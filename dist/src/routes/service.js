@@ -9,5 +9,4 @@ const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.post('/loan', authMiddleware_1.protect, serviceController_1.applyLoan);
 router.get('/loans', authMiddleware_1.protect, serviceController_1.getLoans);
-// Add: router.post('/insurance', protect, applyInsurance); etc.
 exports.default = router;
