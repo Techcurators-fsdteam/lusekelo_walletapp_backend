@@ -4,34 +4,18 @@ import crypto from 'crypto';
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 export class OTPService {
-  // Generate a 6-digit OTP
+  // Generate a 6-digit OTP (kept for backward compatibility, but Twilio Verify generates its own)
   static generateOTP(): string {
     return crypto.randomInt(100000, 999999).toString();
   }
 
-  // Send OTP via SMS using Twilio
-  static async sendOTP(phoneNumber: string, otp: string): Promise<boolean> {
+  // Send OTP via Twilio Verify API (supports Indian numbers)
+  static async sendOTP(phoneNumber: string, otp?: string): Promise<boolean> {
     try {
       // Check if Twilio is properly configured
-      if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+      if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
         console.error('Twilio configuration missing');
         return false;
-      }
-
-      // Validate and format Twilio phone number
-      let twilioPhone = process.env.TWILIO_PHONE_NUMBER;
-      console.log('Raw Twilio phone number from env:', twilioPhone);
-      
-      // If the + was stripped, add it back for Indian numbers
-      if (!twilioPhone.startsWith('+')) {
-        if (twilioPhone.startsWith('91') && twilioPhone.length === 12) {
-          twilioPhone = `+${twilioPhone}`;
-          console.log('Added + to Twilio phone number:', twilioPhone);
-        } else {
-          console.error('Twilio phone number must be in international format (e.g., +1234567890)');
-          console.error('Current Twilio phone number:', twilioPhone);
-          return false;
-        }
       }
 
       // Format phone number to international format for India
@@ -56,31 +40,77 @@ export class OTPService {
       }
       
       console.log(`Sending OTP to: ${formattedPhone}`);
-      console.log(`From Twilio number: ${twilioPhone}`);
       
-      // TEMPORARY: For development/testing, simulate OTP sending if using invalid Twilio number
-      if (twilioPhone.startsWith('+918103851211')) {
-        console.log('🚨 DEVELOPMENT MODE: Simulating OTP send (Twilio number is invalid)');
-        console.log(`📱 OTP ${otp} would be sent to ${formattedPhone}`);
-        console.log('⚠️  Please get a real Twilio phone number for production');
-        return true; // Simulate success
-      }
-      
-      const message = await client.messages.create({
-        body: `Your Mjicho Wallet verification code is: ${otp}. This code will expire in 10 minutes.`,
-        from: twilioPhone,
-        to: formattedPhone,
-      });
+      // Use Twilio Verify API if VERIFY_SERVICE_SID is configured
+      if (process.env.VERIFY_SERVICE_SID) {
+        console.log('Using Twilio Verify API');
+        const verification = await client.verify.v2
+          .services(process.env.VERIFY_SERVICE_SID)
+          .verifications.create({
+            to: formattedPhone,
+            channel: 'sms'
+          });
 
-      console.log(`OTP sent successfully. Message SID: ${message.sid}`);
-      return true;
-    } catch (error) {
+        console.log(`OTP sent successfully via Verify API. Status: ${verification.status}`);
+        return verification.status === 'pending';
+      } else {
+        // Fallback to SMS API (requires valid Twilio phone number)
+        console.error('⚠️  VERIFY_SERVICE_SID not configured. Please add it to your .env file');
+        console.error('You can find it in your Twilio Console under Verify > Services');
+        return false;
+      }
+    } catch (error: any) {
       console.error('Error sending OTP:', error);
+      if (error.code) {
+        console.error('Twilio Error Code:', error.code);
+        console.error('Twilio Error Message:', error.message);
+      }
       return false;
     }
   }
 
-  // Verify OTP
+  // Verify OTP using Twilio Verify API
+  static async verifyOTPWithTwilio(phoneNumber: string, otp: string): Promise<boolean> {
+    try {
+      if (!process.env.VERIFY_SERVICE_SID) {
+        console.error('VERIFY_SERVICE_SID not configured');
+        return false;
+      }
+
+      // Format phone number to international format
+      let formattedPhone = phoneNumber.replace(/[\s\-\(\)]/g, '');
+      if (!formattedPhone.startsWith('+')) {
+        if (formattedPhone.startsWith('91')) {
+          formattedPhone = `+${formattedPhone}`;
+        } else if (/^[6-9]\d{9}$/.test(formattedPhone)) {
+          formattedPhone = `+91${formattedPhone}`;
+        } else {
+          formattedPhone = `+91${formattedPhone}`;
+        }
+      }
+
+      console.log(`Verifying OTP for: ${formattedPhone}`);
+
+      const verificationCheck = await client.verify.v2
+        .services(process.env.VERIFY_SERVICE_SID)
+        .verificationChecks.create({
+          to: formattedPhone,
+          code: otp
+        });
+
+      console.log(`OTP verification status: ${verificationCheck.status}`);
+      return verificationCheck.status === 'approved';
+    } catch (error: any) {
+      console.error('Error verifying OTP with Twilio:', error);
+      if (error.code) {
+        console.error('Twilio Error Code:', error.code);
+        console.error('Twilio Error Message:', error.message);
+      }
+      return false;
+    }
+  }
+
+  // Verify OTP (legacy method for backward compatibility)
   static verifyOTP(userOTP: string, storedOTP: string, otpExpiry: Date): boolean {
     if (!userOTP || !storedOTP || !otpExpiry) {
       return false;
