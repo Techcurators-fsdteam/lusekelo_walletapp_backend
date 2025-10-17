@@ -52,6 +52,7 @@ const sendOTP = async (req, res) => {
         console.log('Attempting to send OTP via SMS...');
         const otpSent = await otpService_1.OTPService.sendOTP(normalizedMobile, otp);
         console.log('OTP sent result:', otpSent);
+        console.log('Twilio response:', otpSent);
         if (!otpSent) {
             console.log('Failed to send OTP via SMS');
             return res.status(500).json({ error: 'Failed to send OTP' });
@@ -80,7 +81,8 @@ const verifyOTP = async (req, res) => {
         if (!user) {
             return res.status(400).json({ error: 'User not found' });
         }
-        const isValidOTP = otpService_1.OTPService.verifyOTP(otp, user.otp, user.otpExpiry);
+        console.log('Verifying OTP with Twilio Verify API...');
+        const isValidOTP = await otpService_1.OTPService.verifyOTPWithTwilio(normalizedMobile, otp);
         if (!isValidOTP) {
             return res.status(400).json({ error: 'Invalid or expired OTP' });
         }

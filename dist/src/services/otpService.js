@@ -13,22 +13,9 @@ class OTPService {
     }
     static async sendOTP(phoneNumber, otp) {
         try {
-            if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+            if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
                 console.error('Twilio configuration missing');
                 return false;
-            }
-            let twilioPhone = process.env.TWILIO_PHONE_NUMBER;
-            console.log('Raw Twilio phone number from env:', twilioPhone);
-            if (!twilioPhone.startsWith('+')) {
-                if (twilioPhone.startsWith('91') && twilioPhone.length === 12) {
-                    twilioPhone = `+${twilioPhone}`;
-                    console.log('Added + to Twilio phone number:', twilioPhone);
-                }
-                else {
-                    console.error('Twilio phone number must be in international format (e.g., +1234567890)');
-                    console.error('Current Twilio phone number:', twilioPhone);
-                    return false;
-                }
             }
             let formattedPhone = phoneNumber;
             formattedPhone = formattedPhone.replace(/[\s\-\(\)]/g, '');
@@ -46,23 +33,66 @@ class OTPService {
                 }
             }
             console.log(`Sending OTP to: ${formattedPhone}`);
-            console.log(`From Twilio number: ${twilioPhone}`);
-            if (twilioPhone.startsWith('+918103851211')) {
-                console.log('🚨 DEVELOPMENT MODE: Simulating OTP send (Twilio number is invalid)');
-                console.log(`📱 OTP ${otp} would be sent to ${formattedPhone}`);
-                console.log('⚠️  Please get a real Twilio phone number for production');
-                return true;
+            if (process.env.VERIFY_SERVICE_SID) {
+                console.log('Using Twilio Verify API');
+                const verification = await client.verify.v2
+                    .services(process.env.VERIFY_SERVICE_SID)
+                    .verifications.create({
+                    to: formattedPhone,
+                    channel: 'sms'
+                });
+                console.log(`OTP sent successfully via Verify API. Status: ${verification.status}`);
+                return verification.status === 'pending';
             }
-            const message = await client.messages.create({
-                body: `Your Mjicho Wallet verification code is: ${otp}. This code will expire in 10 minutes.`,
-                from: twilioPhone,
-                to: formattedPhone,
-            });
-            console.log(`OTP sent successfully. Message SID: ${message.sid}`);
-            return true;
+            else {
+                console.error('⚠️  VERIFY_SERVICE_SID not configured. Please add it to your .env file');
+                console.error('You can find it in your Twilio Console under Verify > Services');
+                return false;
+            }
         }
         catch (error) {
             console.error('Error sending OTP:', error);
+            if (error.code) {
+                console.error('Twilio Error Code:', error.code);
+                console.error('Twilio Error Message:', error.message);
+            }
+            return false;
+        }
+    }
+    static async verifyOTPWithTwilio(phoneNumber, otp) {
+        try {
+            if (!process.env.VERIFY_SERVICE_SID) {
+                console.error('VERIFY_SERVICE_SID not configured');
+                return false;
+            }
+            let formattedPhone = phoneNumber.replace(/[\s\-\(\)]/g, '');
+            if (!formattedPhone.startsWith('+')) {
+                if (formattedPhone.startsWith('91')) {
+                    formattedPhone = `+${formattedPhone}`;
+                }
+                else if (/^[6-9]\d{9}$/.test(formattedPhone)) {
+                    formattedPhone = `+91${formattedPhone}`;
+                }
+                else {
+                    formattedPhone = `+91${formattedPhone}`;
+                }
+            }
+            console.log(`Verifying OTP for: ${formattedPhone}`);
+            const verificationCheck = await client.verify.v2
+                .services(process.env.VERIFY_SERVICE_SID)
+                .verificationChecks.create({
+                to: formattedPhone,
+                code: otp
+            });
+            console.log(`OTP verification status: ${verificationCheck.status}`);
+            return verificationCheck.status === 'approved';
+        }
+        catch (error) {
+            console.error('Error verifying OTP with Twilio:', error);
+            if (error.code) {
+                console.error('Twilio Error Code:', error.code);
+                console.error('Twilio Error Message:', error.message);
+            }
             return false;
         }
     }

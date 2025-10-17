@@ -69,6 +69,7 @@ import serviceRoutes from '../src/routes/service';
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 import qrRoutes from '../src/routes/qr';
+import analyticsRoutes from '../src/routes/analytics';
 import path from 'path';
 
 // Configure dotenv
@@ -96,6 +97,7 @@ app.use('/transaction', transactionRoutes);
 app.use('/pay', payRoutes);
 app.use('/service', serviceRoutes);
 app.use('/qr', qrRoutes);
+app.use('/analytics', analyticsRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Health check route
